@@ -1,5 +1,6 @@
 module.exports = (function(){
   var Firebase = require('firebase');
+  var $q = require('q'); // for timeout promise
 
   var baseUrl = '';
   var rebase;
@@ -118,11 +119,12 @@ module.exports = (function(){
     return { endpoint, method, id };
   };
 
-  function timeout($q, ref, eventType, timeOutPeriod) {
-      var deferred = $q.defer();
+  // default timeout 2 secs
+  function timeout(ref, eventType, timeOut = {period: 2000}) {
+      var deferred = (timeOut.q || $q).defer();
       $timeout(function() {
           deferred.reject("TIMEOUT");
-      }, timeOutPeriod)
+      }, timeOut.period)
       ref.once(eventType,
           function(data) {
               deferred.resolve(data);
@@ -134,6 +136,16 @@ module.exports = (function(){
       return deferred.promise;
   }
 
+  function _refOnce(value, options) {
+    ref.once('value', (snapshot) => {
+      var data = options.asArray === true ? _toArray(snapshot) : snapshot.val();
+      options.then.call(options.context, data);
+    }, (err) => {
+      options.failure.call(options.context, err);
+    });
+  }
+
+
   function _fetch(endpoint, options){
     _validateEndpoint(endpoint);
     optionValidators.context(options);
@@ -142,12 +154,11 @@ module.exports = (function(){
     var ref = new Firebase(`${baseUrl}/${endpoint}`);
     ref = _addQueries(ref, options.queries);
 
-    ref.once('value', (snapshot) => {
-      var data = options.asArray === true ? _toArray(snapshot) : snapshot.val();
-      options.then.call(options.context, data);
-    }, (err) => {
-      options.failure.call(options.context, err);
-    });
+    if (options.timeout) {
+      timeout(ref, 'value', options.timeout);
+    } else {
+      _refOnce(ref, 'value', options);
+    }
   };
 
   function _firebaseRefsMixin(endpoint, invoker, ref){

@@ -252,6 +252,9 @@ addUser(){
     - The relative Firebase endpoint that you'd like to push the new data to
   2. options
     - type: object
+    - timeout: object
+      - period (millisecs, default 2000)
+      - q promise factory (by default uses [q promises](https://github.com/kriskowal/q))
     - properties:
       - data: (any - required) The data you're wanting to persist to Firebase
       - then: (function - optional) A callback that will get invoked once the new data has been saved to Firebase (will be passed an Error object on failure to update)
