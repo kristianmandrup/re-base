@@ -186,6 +186,7 @@ componentDidMount(){
       - context: (object - required) The context of your component
       - asArray: (boolean - optional) Returns the Firebase data at the specified endpoint as an Array instead of an Object
       - then: (function - required) The callback function that will be invoked with the data from the specified endpoint when the endpoint changes
+      - failure: (function - optional) The callback function that will be invoked on failure with an Error object.
       - queries: (object - optional) Queries to be used with your read operations.  See [Query Options](#queries) for more details.
 
 #### Return Value
@@ -253,7 +254,7 @@ addUser(){
     - type: object
     - properties:
       - data: (any - required) The data you're wanting to persist to Firebase
-      - then: (function - optional) A callback that will get invoked once the new data has been saved to Firebase
+      - then: (function - optional) A callback that will get invoked once the new data has been saved to Firebase (will be passed an Error object on failure to update)
 
 #### Return Value
   A Firebase reference for the generated location

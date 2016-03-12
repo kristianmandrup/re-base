@@ -118,6 +118,22 @@ module.exports = (function(){
     return { endpoint, method, id };
   };
 
+  function timeout($q, ref, eventType, timeOutPeriod) {
+      var deferred = $q.defer();
+      $timeout(function() {
+          deferred.reject("TIMEOUT");
+      }, timeOutPeriod)
+      ref.once(eventType,
+          function(data) {
+              deferred.resolve(data);
+          },
+          function(error) {
+              deferred.reject(error);
+          }
+      );
+      return deferred.promise;
+  }
+
   function _fetch(endpoint, options){
     _validateEndpoint(endpoint);
     optionValidators.context(options);
@@ -125,9 +141,12 @@ module.exports = (function(){
     options.queries && optionValidators.query(options);
     var ref = new Firebase(`${baseUrl}/${endpoint}`);
     ref = _addQueries(ref, options.queries);
+
     ref.once('value', (snapshot) => {
       var data = options.asArray === true ? _toArray(snapshot) : snapshot.val();
       options.then.call(options.context, data);
+    }, (err) => {
+      options.failure.call(options.context, err);
     });
   };
 
