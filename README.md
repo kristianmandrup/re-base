@@ -223,8 +223,9 @@ getSales(){
   2. options
     - type: object
     - properties:
-      - data: (any - required) The data you're wanting to persist to Firebase
-      - then: (function - optional) A callback that will get invoked once the new data has been saved to Firebase
+      - data: (any - required) The data you're wanting to persist to Firebase (via `ref.set`)
+      - priority (number - optional) Priority for `ref.setWithPriority`
+      - then: (function - optional) A callback that will get invoked once the new data has been saved to Firebase. Will be passed an Error object on error. Uses [Firebase ref.set](https://www.firebase.com/docs/web/api/firebase/set.html)
 
 #### Return Value
   No return value

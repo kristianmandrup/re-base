@@ -309,15 +309,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return returnRef;
 	  };
 
+	  /*
+	    options:
+	      - data : any data structure
+	      - priority : number (optional)
+	      - then : function (optional)
+	     then function is called on set (passed an Error object on any error)
+	  */
 	  function _post(endpoint, options) {
 	    _validateEndpoint(endpoint);
 	    optionValidators.data(options);
 	    var ref = new Firebase(baseUrl + '/' + endpoint);
-	    if (options.then) {
-	      ref.set(options.data, options.then);
-	    } else {
-	      ref.set(options.data);
-	    }
+	    var operation = options.priority ? ref.setWithPriority : ref.set;
+	    var args = [options.data];
+	    options.priority || args.push(options.priority);
+	    options.then || args.push(options.then);
+
+	    operation.apply(this, args);
 	  };
 
 	  function _push(endpoint, options) {
